@@ -1,0 +1,25 @@
+{
+  "name": "fafiebig/faf-wall",
+  "description": "Wordpress Plugin for Image Walls based on freewall",
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "freewall",
+    "wall",
+    "responsive"
+  ],
+  "homepage": "https://github.com/fafiebig/faf-wall",
+  "license": "GNU GENERAL PUBLIC LICENSE",
+  "authors": [
+    {
+      "name": "F.A. Fiebig",
+      "email": "fafworx@gmail.com",
+      "homepage": "http://fafworx.com"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "require": {
+    "php": ">=5.3.2",
+    "composer/installers": "v1.2.0"
+  }
+}
