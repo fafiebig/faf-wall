@@ -36,7 +36,7 @@ add_action('admin_enqueue_scripts', 'fafWallEnqueueAdminScriptsStyles');
 function fafWallEnqueueScriptsStyles()
 {
     wp_enqueue_style('fw-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array('bootstrap'), '1.0');
-    wp_enqueue_script('fw-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('fw-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', false);
 }
 add_action('wp_enqueue_scripts', 'fafWallEnqueueScriptsStyles');
 
