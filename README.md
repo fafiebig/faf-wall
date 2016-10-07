@@ -3,6 +3,8 @@
 Wordpress Plugin for Image Walls.
 Show image galleries as responsive wall.
 
+[VNJS Freewall](http://vnjs.net/www/project/freewall/)
+
 # Installation
 
 * Unzip and upload the plugin to the **/wp-content/plugins/** directory
