@@ -35,7 +35,7 @@ add_action('admin_enqueue_scripts', 'fafWallEnqueueAdminScriptsStyles');
  */
 function fafWallEnqueueScriptsStyles()
 {
-    wp_enqueue_style('fw-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array('bootstrap'), '1.0');
+    wp_enqueue_style('fw-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array(), '1.0');
     wp_enqueue_script('fw-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', false);
 }
 add_action('wp_enqueue_scripts', 'fafWallEnqueueScriptsStyles');
@@ -60,7 +60,8 @@ function fafWallShort($atts)
     if (isset($atts['images'])) {
         $images = explode(',', $atts['images']);
         $id     = uniqid('wall');
-        $html   = '<div class="'.$id.'">';
+        $html   = '<div id="'.$id.'" class="free-wall"><div>';
+        $pics   = array();
 
         foreach ($images AS $imgId) {
 
@@ -69,21 +70,39 @@ function fafWallShort($atts)
             $imgSrcset  = wp_get_attachment_image_srcset($imgId, 'medium');
             $imgSizes   = wp_get_attachment_image_sizes($imgId, 'medium');
 
-            $html .= '<div class="item">';
-            $html .= '<a rel="lightbox" href="' . esc_url($imgSrc) . '" title="">';
-            $html .= '<img src="'.esc_url($imgSrc).'" srcset="'.esc_attr($imgSrcset).'" sizes="'.esc_attr($imgSizes).'" class="logo" alt=""/>';
-            $html .= '</a>';
-            $html .= '</div>';
+            $pics[] = esc_url($imgLarge);
         }
 
-        $html .= '</div>';
+        $imgs = '["' . implode('", "', $pics) . '"]';
 
         $html .= '<script>
-                    $(function() {
-                        var wall = new Freewall("#'.$id.'");
-                        wall.fitWidth();
-                    });
-                </script>';
+    // grid wall
+    var temp = "<a class=\"free-wall-link\" rel=\"lightbox\" href=\"{index}\"><div class=\"cell\" style=\"width:{width}px; height: {height}px; background-image: url({index})\"></div></a>";
+    var w = 1, html = "";
+    var imgs = '.$imgs.';
+
+    imgs.forEach(function(ix){
+        w = 250 + 250 * Math.random() << 0;
+        html += temp.replace(/\{height\}/g, 250).replace(/\{width\}/g, w).replace(/\{index\}/g, ix);
+    });
+    $("#'.$id.'").html(html);
+
+    var wall = new Freewall("#'.$id.'");
+    wall.reset({
+        selector: ".cell",
+        animate: false,
+        cellW: 250,
+        cellH: 250,
+        gutterX: 10,
+        gutterY: 10,
+        onResize: function () {
+            wall.fitWidth();
+        }
+    });
+    wall.fitWidth();
+    // for scroll bar appear;
+    $(window).trigger("resize");
+</script>';
 
         return $html;
     }
