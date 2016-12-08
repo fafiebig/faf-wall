@@ -102,7 +102,12 @@ $(document).ready(function() {
     $(window).trigger("resize");
 
     var gallery = $(".free-wall .free-wall-link").simpleLightbox({
-        animationSlide: false
+        animationSlide: false,
+        close: false,
+        captions: true,
+        captionSelector: "self",
+        spinner: true,
+        nav: false
     });
 
     $(document).on("click", ".sl-image img", function(){
