@@ -35,8 +35,11 @@ add_action('admin_enqueue_scripts', 'fafWallEnqueueAdminScriptsStyles');
  */
 function fafWallEnqueueScriptsStyles()
 {
-    wp_enqueue_style('fw-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array(), '1.0', 'all');
-    wp_enqueue_script('fw-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_style('freewall-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array(), '1.0', 'all');
+    wp_enqueue_script('freewall-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', true);
+
+    wp_enqueue_style('simplelightbox-css', plugins_url('simplelightbox/css/simplelightbox.min.css', __FILE__), array(), '1.0', 'all');
+    wp_enqueue_script('simplelightbox-js', plugins_url('simplelightbox/js/simplelightbox.min.js', __FILE__), array('jquery'), '1.0', false);
 }
 add_action('wp_enqueue_scripts', 'fafWallEnqueueScriptsStyles');
 
@@ -82,7 +85,7 @@ function fafWallShort($atts)
         $html .= '</div>';
 
         $html .= '<script>
-$( document ).ready(function() {
+$(document).ready(function() {
     var wall = new Freewall("#'.$id.'");
     wall.reset({
         selector: ".cell",
@@ -97,6 +100,14 @@ $( document ).ready(function() {
     });
     wall.fitWidth();
     $(window).trigger("resize");
+
+    var gallery = $(".free-wall .free-wall-link").simpleLightbox({
+        animationSlide: false
+    });
+
+    $(document).on("click", ".sl-image img", function(){
+        gallery.next();
+    });
 });
 </script>';
 
@@ -185,14 +196,27 @@ $( document ).ready(function() {
         animate: false,
         cellW: '.$height.',
         cellH: '.$height.',
-        gutterX: 15,
-        gutterY: 15,
+        gutterX: 20,
+        gutterY: 20,
         onResize: function () {
             wall.refresh();
         }
     });
     wall.fitWidth();
     $(window).trigger("resize");
+
+    var gallery = $(".free-wall .free-wall-link").simpleLightbox({
+        animationSlide: false,
+        close: false,
+        captions: true,
+        captionSelector: "self",
+        spinner: true,
+        nav: false
+    });
+
+    $(document).on("click", ".sl-image img", function(){
+        gallery.next();
+    });
 });
 </script>';
 
