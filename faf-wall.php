@@ -35,11 +35,16 @@ add_action('admin_enqueue_scripts', 'fafWallEnqueueAdminScriptsStyles');
  */
 function fafWallEnqueueScriptsStyles()
 {
+    /* load freewall scripts and styles */
     wp_enqueue_style('freewall-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array(), '1.0', 'all');
     wp_enqueue_script('freewall-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', true);
 
+    /* load slb scripts and styles */
     wp_enqueue_style('simplelightbox-css', plugins_url('simplelightbox/css/simplelightbox.min.css', __FILE__), array(), '1.0', 'all');
-    wp_enqueue_script('simplelightbox-js', plugins_url('simplelightbox/js/simplelightbox.min.js', __FILE__), array('jquery'), '1.0', false);
+    wp_enqueue_script('simplelightbox-js', plugins_url('simplelightbox/js/simplelightbox.min.js', __FILE__), array('jquery'), '1.0', true);
+
+    /* load faf trigger script */
+    wp_enqueue_script('faf-wall-js', plugins_url('faf-wall.js', __FILE__), array('jquery', 'freewall-js', 'simplelightbox-js'), '1.0', true);
 }
 add_action('wp_enqueue_scripts', 'fafWallEnqueueScriptsStyles');
 
@@ -53,77 +58,8 @@ function fafWallAddEditorButton()
 add_action('media_buttons', 'fafWallAddEditorButton', 100);
 
 /**
- * exif short code
- *
  * @param $atts
  * @return string
- */
-function fafWallShort($atts)
-{
-    if (isset($atts['images'])) {
-        $images = explode(',', $atts['images']);
-        $height = ($atts['size'])?$atts['size']:200;
-        $id     = uniqid('wall');
-        $html   = '<div id="'.$id.'" class="free-wall">';
-
-        shuffle($images);
-        foreach ($images AS $imgId) {
-            $width      = $height + $height * random_int(0,1);
-
-            $imgTitle   = get_the_title($imgId);
-            //$imgMeta    = wp_get_attachment_metadata($imgId);
-            $imgLarge   = wp_get_attachment_image_url($imgId, 'large');
-            $imgSrc     = wp_get_attachment_image_url($imgId, 'medium');
-            //$imgSet     = wp_get_attachment_image_srcset($imgId, 'medium');
-            //$imgSizes   = wp_get_attachment_image_sizes($imgId, 'medium');
-
-            $html .= '<a class="free-wall-link" rel="lightbox" href="'.esc_url($imgLarge).'" title="'.esc_attr($imgTitle).'">';
-            $html .= '<div class="cell" style="width:'.$width.'px; height: '.$height.'px; background-image: url('.esc_url($imgSrc).')"></div>';
-            $html .= '</a>';
-        }
-
-        $html .= '</div>';
-
-        $html .= '<script>
-$(document).ready(function() {
-    var wall = new Freewall("#'.$id.'");
-    wall.reset({
-        selector: ".cell",
-        animate: false,
-        cellW: '.$height.',
-        cellH: '.$height.',
-        gutterX: 15,
-        gutterY: 15,
-        onResize: function () {
-            wall.fitWidth();
-        }
-    });
-    wall.fitWidth();
-    $(window).trigger("resize");
-
-    var gallery = $(".free-wall .free-wall-link").simpleLightbox({
-        animationSlide: false,
-        close: false,
-        captions: true,
-        captionSelector: "self",
-        spinner: true,
-        nav: false
-    });
-
-    $(document).on("click", ".sl-image img", function(){
-        gallery.next();
-    });
-});
-</script>';
-
-        return $html;
-    }
-}
-add_shortcode('wall', 'fafWallShort');
-
-
-/**
- * @param $atts
  */
 function fafWallGalleryShort($atts) {
 
@@ -179,14 +115,19 @@ function fafWallGalleryShort($atts) {
         $width          = $height + $height * random_int(0,1);
 
         $imgTitle   = get_the_title($image->ID);
-        //$imgMeta    = wp_get_attachment_metadata($image->ID);
+        $imgMeta    = wp_get_attachment_metadata($image->ID, true);
         $imgLarge   = wp_get_attachment_image_url($image->ID, 'large');
-        $imgSrc     = wp_get_attachment_image_url($image->ID, 'medium');
+        $imgMedium  = wp_get_attachment_image_url($image->ID, 'medium');
+        $imgFull    = wp_get_attachment_image_url($image->ID, 'full');
         //$imgSet     = wp_get_attachment_image_srcset($image->ID, 'medium');
         //$imgSizes   = wp_get_attachment_image_sizes($image->ID, 'medium');
 
-        $html .= '<a class="free-wall-link" rel="lightbox" href="'.esc_url($imgLarge).'" title="'.esc_attr($imgTitle).'">';
-        $html .= '<div class="cell" style="width:'.$width.'px; height: '.$height.'px; background-image: url('.esc_url($imgSrc).')"></div>';
+        $exif = mapExif(exif_read_data($imgFull));
+        //$exif = mapMeta($imgMeta['image_meta']);
+        $meta = implode(", ", $exif);
+
+        $html .= '<a class="free-wall-link" rel="lightbox" href="'.esc_url($imgLarge).'" title="'.esc_attr($imgTitle).' | '.$meta.'">';
+        $html .= '<div class="cell" style="width:'.$width.'px; height: '.$height.'px; background-image: url('.esc_url($imgMedium).')"></div>';
         $html .= '</a>';
 
 
@@ -194,39 +135,73 @@ function fafWallGalleryShort($atts) {
     $html .= '</div>';
 
     $html .= '<script>
-$( document ).ready(function() {
-    var wall = new Freewall("#'.$id.'");
-    wall.reset({
-        selector: ".cell",
-        animate: false,
-        cellW: '.$height.',
-        cellH: '.$height.',
-        gutterX: 20,
-        gutterY: 20,
-        onResize: function () {
-            wall.refresh();
-        }
-    });
-    wall.fitWidth();
-    $(window).trigger("resize");
-
-    var gallery = $(".free-wall .free-wall-link").simpleLightbox({
-        animationSlide: false,
-        close: false,
-        captions: true,
-        captionSelector: "self",
-        spinner: true,
-        nav: false
-    });
-
-    $(document).on("click", ".sl-image img", function(){
-        gallery.next();
-    });
-});
+    var wallId = "#'.$id.'";
+    var wallHeight = '.$height.';
 </script>';
 
     return $html;
 }
 remove_shortcode('gallery');
 add_shortcode('gallery', 'fafWallGalleryShort');
+
+function mapMeta($meta)
+{
+    $retval = array();
+    foreach ($meta AS $key => $val) {
+        switch ($key) {
+            case 'aperture':
+                $retval[] = 'f'.$val;
+                break;
+            case 'camera':
+                $retval[] = $val;
+                break;
+            case 'focal_length':
+                $retval[] = $val.'mm';
+                break;
+            case 'iso':
+                $retval[] = 'ISO'.$val;
+                break;
+            case 'shutter_speed':
+                $retval[] = round($val,2).'sek';
+                break;
+        }
+    }
+
+    return $retval;
+}
+
+function mapExif($exif)
+{
+    $retval = array();
+    foreach ($exif AS $key => $val) {
+        switch ($key) {
+            case 'Make':
+            case 'Model':
+            case 'UndefinedTag:0xA434':
+                $retval[] = $val;
+                break;
+            case 'ExposureTime':
+                $retval[] = $val.'sec';
+                break;
+            case 'ISOSpeedRatings':
+                $retval[] = 'ISO'.$val;
+                break;
+            case 'FNumber':
+                @list($a, $v) = explode('/', $val);
+                $retval[] = 'F'.($a/$v);
+                break;
+            case 'FocalLength':
+                @list($a, $v) = explode('/', $val);
+                $retval[] = ($a/$v).'mm';
+                break;
+            case 'Flash':
+                if ($val != 16) {
+                    $retval[] = 'Flash';
+                }
+                break;
+        }
+    }
+
+    return $retval;
+}
 
