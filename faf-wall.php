@@ -37,14 +37,14 @@ function fafWallEnqueueScriptsStyles()
 {
     /* load freewall scripts and styles */
     wp_enqueue_style('freewall-css', plugins_url('freewall/css/freewall.min.css', __FILE__), array(), '1.0', 'all');
-    wp_enqueue_script('freewall-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('freewall-js', plugins_url('freewall/js/freewall.min.js', __FILE__), array(), '1.0', true);
 
     /* load slb scripts and styles */
     wp_enqueue_style('simplelightbox-css', plugins_url('simplelightbox/css/simplelightbox.min.css', __FILE__), array(), '1.0', 'all');
-    wp_enqueue_script('simplelightbox-js', plugins_url('simplelightbox/js/simplelightbox.min.js', __FILE__), array('jquery'), '1.0', true);
+    wp_enqueue_script('simplelightbox-js', plugins_url('simplelightbox/js/simplelightbox.min.js', __FILE__), array(), '1.0', true);
 
     /* load faf trigger script */
-    wp_enqueue_script('faf-wall-js', plugins_url('faf-wall.js', __FILE__), array('jquery', 'freewall-js', 'simplelightbox-js'), '1.0', true);
+    wp_enqueue_script('faf-wall-js', plugins_url('faf-wall.js', __FILE__), array('freewall-js', 'simplelightbox-js'), '1.0', true);
 }
 add_action('wp_enqueue_scripts', 'fafWallEnqueueScriptsStyles');
 
@@ -112,7 +112,7 @@ function fafWallGalleryShort($atts) {
         //$caption        = $image->post_excerpt;
         //$description    = $image->post_content;
         //$image_alt      = get_post_meta($image->ID,'_wp_attachment_image_alt', true);
-        $width          = $height + $height * random_int(0,1);
+        $width          = $height * random_int(1,3);
 
         $imgTitle   = get_the_title($image->ID);
         $imgMeta    = wp_get_attachment_metadata($image->ID, true);
