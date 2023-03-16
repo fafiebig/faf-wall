@@ -1,3 +1,6 @@
+# DEPRECATED - DO NOT USE IT ANY LONGER!
+
+
 # faf-wall
 
 Wordpress Plugin for Image Walls.
